@@ -1,137 +1,70 @@
-const canvas = document.getElementById("canvas")
-const ctx = canvas.getContext("2d")
+console.log("matrix.js carregou");
 
-let cw = window.innerWidth;
-let ch = window.innerHeight;
+let FALL_DELAY = 40;
 
+const FONT_SIZE = 16;
+const CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789アァカサタナハマヤャラワン".split("");
+const BACKGROUND_ALPHA = 0.03;
+const canvas = document.getElementById("matrixCanvas");
+const ctx = canvas.getContext("2d");
 
-canvas.width = cw;
-canvas.height = ch;
+let width, height, columns;
+let drops = [];
 
+function resizeCanvas() {
+  const dpr = window.devicePixelRatio || 1;
 
-window.addEventListener('resize', function(event) {
-    cw = window.innerWidth;
-    ch = window.innerHeight;
-    canvas.width = cw
-    canvas.height = ch;
-    maxColumns = cw / fontSize;
-    console.log(cw, ch)
-}, true);
+  width = window.innerWidth;
+  height = window.innerHeight;
 
-let charArr = [
-  "a",
-  "b",
-  "c",
-  "d",
-  "e",
-  "f",
-  "g",
-  "h",
-  "i",
-  "j",
-  "k",
-  "l",
-  "m",
-  "n",
-  "o",
-  "p",
-  "q",
-  "r",
-  "s",
-  "t",
-  "u",
-  "v",
-  "w",
-  "x",
-  "y",
-  "z",
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "А",
-  "В",
-  "Г",
-  "Д",
-  "Є",
-  "Ѕ",
-  "З",
-  "И",
-  "Ѳ",
-  "І",
-  "К",
-  "Л",
-  "М",
-  "Н",
-  "Ѯ",
-  "Ѻ",
-  "П",
-  "Ч",
-  "Р",
-  "С",
-  "Т",
-  "Ѵ",
-  "Ф",
-  "Х",
-  "Ѱ",
-  "Ѿ",
-  "Ц",
-  "&",
-  "%",
-];
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
 
-let maxCharCount = 300;
-let fallingCharArr = [];
-let fontSize = 13;
-let maxColumns = cw / fontSize;
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
 
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-let frames = 0;
+  columns = Math.floor(width / FONT_SIZE);
+  drops = Array(columns).fill(0);
+}
 
-class FallingChar {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-  }
+function drawBackground() {
+  ctx.fillStyle = `rgba(0, 0, 0, ${BACKGROUND_ALPHA})`;
+  ctx.fillRect(0, 0, width, height);
+}
 
-  draw(ctx) {
-    this.value =
-      charArr[Math.floor(Math.random() * (charArr.length - 1))].toUpperCase();
-    this.speed = (Math.random() * fontSize * 3) / 4 + (fontSize * 3) / 4;
+const SPEED = 0.5;
 
-    ctx.fillStyle = "rgba(0,255,0)";
-    ctx.font = fontSize + "px sans-serif";
-    ctx.fillText(this.value, this.x, this.y);
-    this.y += this.speed;
+function drawMatrix() {
+  ctx.fillStyle = "#00ff00";
+  ctx.font = `${FONT_SIZE}px monospace`;
 
-    if (this.y > ch) {
-      this.y = (Math.random() * ch) / 2 - 50;
-      this.x = Math.floor(Math.random() * maxColumns) * fontSize;
-      this.speed = (-Math.random() * fontSize * 3) / 4 + (fontSize * 3) / 4;
+  for (let i = 0; i < drops.length; i++) {
+    const text = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+    const x = i * FONT_SIZE;
+    const y = drops[i] * FONT_SIZE;
+
+    ctx.fillText(text, x, y);
+
+    if (y > height && Math.random() > 0.975) {
+      drops[i] = 0;
     }
+
+    drops[i]++;
   }
 }
 
-let update = () => {
-  if (fallingCharArr.length < maxCharCount) {
-    let fallingChar = new FallingChar(
-      Math.floor(Math.random() * maxColumns) * fontSize,
-      (Math.random() * ch) / 2 - 50
-    );
-    fallingCharArr.push(fallingChar);
-  }
-  ctx.fillStyle = "rgba(0,0,0,0.05)";
-  ctx.fillRect(0, 0, cw, ch);
-  for (let i = 0; i < fallingCharArr.length && frames % 2 == 0; i++) {
-    fallingCharArr[i].draw(ctx);
-  }
+function animate() {
+  drawBackground();
+  drawMatrix();
+  requestAnimationFrame(animate);
+}
 
-  requestAnimationFrame(update);
-  frames++;
-};
+window.addEventListener("click", () => {
+  FALL_DELAY = FALL_DELAY === 40 ? 15 : 70;
+});
 
-update();
+
+resizeCanvas();
+animate();

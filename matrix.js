@@ -34,7 +34,7 @@ function drawBackground() {
   ctx.fillRect(0, 0, width, height);
 }
 
-const SPEED = 0.5;
+const SPEED = 0.7;
 
 function drawMatrix() {
   ctx.fillStyle = "#00ff00";
